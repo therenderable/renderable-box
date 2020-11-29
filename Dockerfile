@@ -13,6 +13,7 @@ COPY . .
 RUN apt-get update && apt-get install -y \
   wget \
   zip \
+  git \
   build-essential \
   zlib1g-dev \
   libncurses5-dev \
