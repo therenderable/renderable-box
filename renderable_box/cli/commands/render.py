@@ -19,7 +19,7 @@ class Render:
       default = '/data/renderable-box/')
 
     parser.add_argument('-f', '--cache_factor',
-      help = 'resource cache factor', type = float, default = 0.75)
+      help = 'resource cache factor, default is 0.75', type = float, default = 0.75)
 
     return parser
 
