@@ -35,6 +35,7 @@ class Render:
 
     if container_name == 'renderable-box':
       logger.error('cannot process tasks from abstract container.')
+      exit(1)
 
     client = APIClient(
       configuration.get('API_HOSTNAME'),
