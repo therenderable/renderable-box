@@ -11,11 +11,7 @@ with open(convert_path(f'{package_directory}/package.py'), 'r') as file:
   exec(file.read(), package_info)
 
 requirements = [
-  'psutil>=5.7.0',
-  'requests>=2.25.0',
-  'pydantic>=1.7.0',
-  'pymongo>=3.11.0',
-  'pika>=1.1.0'
+  'renderable-core@git+https://f2df37d2224599278c1adf7ba248ea3589a85448:x-oauth-basic@github.com/therenderable/renderable-core.git'
 ]
 
 entrypoints = {

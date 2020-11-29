@@ -1,9 +1,8 @@
 import argparse
 from pathlib import Path
 
-import renderable_box
-from renderable_box.models import State, TaskMessage
-from renderable_box.services import Configuration, APIClient, Renderer, WorkQueue
+from renderable_core.models import State, TaskMessage
+from renderable_core.services import Configuration, APIClient, Renderer, WorkQueue
 
 
 class Render:
