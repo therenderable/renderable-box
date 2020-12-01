@@ -2,7 +2,7 @@ import argparse
 from pathlib import Path
 
 from renderable_core.models import State, TaskMessage
-from renderable_core.services import Configuration, APIClient, Renderer, WorkQueue
+from renderable_core.services import Configuration, APIClient, Renderer, WorkQueue, Executor
 
 
 class Render:
@@ -53,22 +53,33 @@ class Render:
       configuration.get('TASK_QUEUE_USERNAME'),
       configuration.get('TASK_QUEUE_PASSWORD'))
 
+    executor = Executor()
+
     def callback(channel, method, task_message):
+      executor.begin_atomic()
+
       try:
         task = client.get_task(task_message.id)
 
-        logger.info(f'processing task "{task.id}" from job "{task.job.id}"...')
+        if task.state in [State.ready, State.running]:
+          logger.info(f'processing task "{task.id}"...')
 
-        if client.update_task_state(task, State.running):
-          if not renderer.has_cache(task):
-            client.download_task_resource(task)
+          if client.update_task_state(task, State.running):
+            if not renderer.has_cache(task):
+              client.download_task_resource(task)
 
-          renderer.render(task)
+            renderer.render(task)
 
-          client.upload_task_resources(task)
-          client.update_task_state(task, State.done)
+            client.upload_task_resources(task)
+            renderer.delete_cache(task)
 
-          renderer.delete_cache(task)
+            client.update_task_state(task, State.done)
+
+            logger.info('task done.')
+          else:
+            logger.info('task error.')
+        else:
+          logger.warning('skipping invalid task...')
 
         channel.basic_ack(delivery_tag = method.delivery_tag)
       except:
@@ -77,8 +88,10 @@ class Render:
 
         channel.basic_nack(delivery_tag = method.delivery_tag)
 
+      executor.end_atomic()
+
     logger.info('starting...')
 
-    task_queue.consume(callback, container_name, TaskMessage)
+    executor.run(task_queue.consume, callback, container_name, TaskMessage)
 
     logger.info('exiting...')
