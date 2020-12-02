@@ -79,7 +79,7 @@ class Render:
           else:
             logger.info('task error.')
         else:
-          logger.warning('skipping invalid task...')
+          logger.warning(f'skipping invalid task {task.id}...')
 
         channel.basic_ack(delivery_tag = method.delivery_tag)
       except:
