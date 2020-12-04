@@ -70,12 +70,17 @@ class Render:
 
             renderer.render(task)
 
-            client.upload_task_resources(task)
+            task = client.get_task(task_message.id)
+
+            if task.state == State.running:
+              client.upload_task_resources(task)
+              client.update_task_state(task, State.done)
+
+              logger.info('task done.')
+            else:
+              logger.info('task already completed.')
+
             renderer.delete_cache(task)
-
-            client.update_task_state(task, State.done)
-
-            logger.info('task done.')
           else:
             logger.info('task error.')
         else:
