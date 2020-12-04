@@ -89,7 +89,7 @@ class Render:
         channel.basic_ack(delivery_tag = method.delivery_tag)
       except:
         logger.warning('failed to process task.')
-        logger.info(f'rescheduling...')
+        logger.info('rescheduling...')
 
         channel.basic_nack(delivery_tag = method.delivery_tag)
 
