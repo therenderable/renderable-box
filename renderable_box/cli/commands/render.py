@@ -1,5 +1,6 @@
 import argparse
 from pathlib import Path
+from threading import Thread
 
 from renderable_core.models import State, TaskMessage
 from renderable_core.services import Configuration, APIClient, Renderer, WorkQueue, Executor
@@ -55,36 +56,43 @@ class Render:
 
     executor = Executor()
 
+    def process_message(task_message):
+      task = client.get_task(task_message.id)
+
+      if task.state in [State.ready, State.running]:
+        logger.info(f'processing task "{task.id}"...')
+
+        if client.update_task_state(task, State.running):
+          if not renderer.has_cache(task):
+            client.download_task_resource(task)
+
+          renderer.render(task)
+
+          task = client.get_task(task_message.id)
+
+          if task.state == State.running:
+            client.upload_task_resources(task)
+            client.update_task_state(task, State.done)
+
+            logger.info('task done.')
+          else:
+            logger.info('task already completed.')
+
+          renderer.delete_cache(task)
+        else:
+          logger.info('task error.')
+      else:
+        logger.warning(f'skipping invalid task {task.id}...')
+
     def callback(channel, method, task_message):
       executor.begin_atomic()
 
       try:
-        task = client.get_task(task_message.id)
+        thread = Thread(target = process_message, args = (task_message,), daemon = True)
+        thread.start()
 
-        if task.state in [State.ready, State.running]:
-          logger.info(f'processing task "{task.id}"...')
-
-          if client.update_task_state(task, State.running):
-            if not renderer.has_cache(task):
-              client.download_task_resource(task)
-
-            renderer.render(task)
-
-            task = client.get_task(task_message.id)
-
-            if task.state == State.running:
-              client.upload_task_resources(task)
-              client.update_task_state(task, State.done)
-
-              logger.info('task done.')
-            else:
-              logger.info('task already completed.')
-
-            renderer.delete_cache(task)
-          else:
-            logger.info('task error.')
-        else:
-          logger.warning(f'skipping invalid task {task.id}...')
+        while thread.is_alive():
+          channel.connection.sleep(10)
 
         channel.basic_ack(delivery_tag = method.delivery_tag)
       except:
