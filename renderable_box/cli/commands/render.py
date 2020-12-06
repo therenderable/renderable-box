@@ -25,7 +25,7 @@ class Render:
 
   def execute(self, args, logger):
     command_template = args.command_template
-    temporary_directory = args.temporary_directory
+    temporary_directory = Path(args.temporary_directory)
     cache_factor = args.cache_factor
 
     configuration = Configuration(Path('/run/secrets/'))
