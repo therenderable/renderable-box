@@ -2,7 +2,7 @@ FROM ubuntu:20.04
 
 LABEL description "Renderable container image."
 LABEL version "1.0.0"
-LABEL maintainer "Danilo Peixoto <danilo@therenderable.com>"
+LABEL maintainer "Danilo Peixoto <danilopeixoto@outlook.com>"
 
 ENV CONTAINER_NAME "renderable-box"
 ENV PYTHON_VERSION "3.7.0"

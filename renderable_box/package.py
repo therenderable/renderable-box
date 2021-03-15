@@ -2,8 +2,8 @@ __title__ = 'Renderable Box'
 __version__ = '1.0.0'
 __description__ = 'Renderable container image application.'
 __author__ = 'Danilo Peixoto'
-__email__ = 'danilo@therenderable.com'
-__license__ = 'Proprietary License'
+__email__ = 'danilopeixoto@outlook.com'
+__license__ = 'BSD-3-Clause'
 __copyright__ = 'Copyright (c) 2020, Renderable, Inc. All rights reserved.'
 
 
